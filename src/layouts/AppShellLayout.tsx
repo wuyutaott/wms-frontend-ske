@@ -1,8 +1,24 @@
-import { Outlet } from 'react-router-dom'
+import { useState, useEffect, useMemo } from 'react'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import AppSidebar from '@/components/AppSidebar'
+import TabBar from '@/components/TabBar'
+import type { SidebarItem } from '@/types/nav'
 
-const mainMenuItems = [
+function buildPathToLabel(items: SidebarItem[]): Record<string, string> {
+  const map: Record<string, string> = {}
+  for (const item of items) {
+    if (item.path) map[item.path] = item.label
+    if (item.children?.length) {
+      for (const c of item.children) {
+        if (c.path) map[c.path] = c.label
+      }
+    }
+  }
+  return map
+}
+
+const mainMenuItems: SidebarItem[] = [
   { id: 'home', label: '首页', path: '/dashboard', icon: 'LayoutDashboard' as const, children: [] },
   {
     id: 'inbound',
@@ -91,10 +107,38 @@ const mainMenuItems = [
 ]
 
 export default function AppShellLayout() {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const pathname = location.pathname
+
+  const [openTabs, setOpenTabs] = useState<string[]>(['/dashboard'])
+
+  const pathToLabel = useMemo(() => buildPathToLabel(mainMenuItems), [])
+
+  useEffect(() => {
+    if (pathname && !openTabs.includes(pathname)) {
+      setOpenTabs((tabs) => [...tabs, pathname])
+    }
+  }, [pathname])
+
+  function handleCloseTab(path: string) {
+    const nextTabs = openTabs.filter((t) => t !== path)
+    if (nextTabs.length === 0) return
+    setOpenTabs(nextTabs)
+    if (path === pathname) {
+      const idx = openTabs.indexOf(path)
+      const goTo = idx > 0 ? openTabs[idx - 1] : nextTabs[0]
+      navigate(goTo)
+    }
+  }
+
   return (
     <SidebarProvider>
       <AppSidebar items={mainMenuItems} />
       <SidebarInset>
+        <header className="flex shrink-0 flex-col border-b bg-background">
+          <TabBar openTabs={openTabs} onCloseTab={handleCloseTab} pathToLabel={pathToLabel} />
+        </header>
         <main className="flex-1 overflow-auto p-6">
           <Outlet />
         </main>

@@ -1,14 +1,15 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { getPathLabel } from '@/config/navConfig'
 
 interface TabBarProps {
   openTabs: string[]
   onCloseTab: (path: string) => void
+  /** path -> 标签文案，用于 Tab 显示 */
+  pathToLabel: Record<string, string>
 }
 
-export default function TabBar({ openTabs, onCloseTab }: TabBarProps) {
+export default function TabBar({ openTabs, onCloseTab, pathToLabel }: TabBarProps) {
   const location = useLocation()
   const navigate = useNavigate()
   const currentPath = location.pathname
@@ -20,6 +21,10 @@ export default function TabBar({ openTabs, onCloseTab }: TabBarProps) {
   function handleClose(e: React.MouseEvent, path: string) {
     e.stopPropagation()
     onCloseTab(path)
+  }
+
+  function getTabLabel(path: string) {
+    return pathToLabel[path] ?? path
   }
 
   if (openTabs.length === 0) return null
@@ -40,7 +45,7 @@ export default function TabBar({ openTabs, onCloseTab }: TabBarProps) {
                 : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             )}
           >
-            <span>{getPathLabel(path)}</span>
+            <span>{getTabLabel(path)}</span>
             <span
               role="button"
               tabIndex={0}
