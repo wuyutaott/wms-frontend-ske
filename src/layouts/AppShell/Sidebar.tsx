@@ -4,6 +4,7 @@ import { ChevronDown } from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarHeader,
   SidebarMenu,
@@ -12,7 +13,8 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-  SidebarRail,
+  SidebarTrigger,
+  useSidebar,
 } from '@/shared/ui/sidebar'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui/collapsible'
 import { cn } from '@/shared/utils/cn'
@@ -25,10 +27,11 @@ function isPathActive(pathname: string, path: string): boolean {
 }
 
 const triggerClass = cn(
-  "flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-hidden ring-sidebar-ring transition-[width,height,padding]",
+  "flex h-8 min-h-8 w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-hidden ring-sidebar-ring transition-[width,padding] duration-200 ease-linear",
   "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2",
   "group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:p-2",
-  "[&>svg]:size-4 [&>svg]:shrink-0 [&>span:last-child]:truncate"
+  "group-data-[collapsible=icon]:[&>span]:hidden group-data-[collapsible=icon]:[&>svg:last-of-type]:hidden",
+  "[&>svg]:size-4 [&>svg]:shrink-0 [&>span]:min-w-0 [&>span]:truncate [&>span]:whitespace-nowrap"
 )
 
 function SidebarNavGroup({
@@ -83,11 +86,20 @@ interface SidebarProps {
 export default function AppShellSidebar({ items }: SidebarProps) {
   const location = useLocation()
   const pathname = location.pathname
+  const { state } = useSidebar()
 
   return (
     <Sidebar variant="inset" collapsible="icon">
-      <SidebarHeader className="border-b border-sidebar-border">
-        <span className="font-semibold">WMS Demo</span>
+      <SidebarHeader className="min-w-0 border-b border-sidebar-border">
+        <span className="flex min-w-0 items-center font-semibold" title={state === 'collapsed' ? 'WMS' : 'WMS Demo'}>
+          <span className="shrink-0">WMS</span>
+          {state !== 'collapsed' && (
+            <>
+              <span className="shrink-0" aria-hidden="true">{'\u00A0'}</span>
+              <span className="min-w-0 truncate whitespace-nowrap">Demo</span>
+            </>
+          )}
+        </span>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -121,7 +133,9 @@ export default function AppShellSidebar({ items }: SidebarProps) {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarRail />
+      <SidebarFooter className="mt-auto flex flex-row justify-start border-t border-sidebar-border">
+        <SidebarTrigger className="size-7 shrink-0" />
+      </SidebarFooter>
     </Sidebar>
   )
 }
