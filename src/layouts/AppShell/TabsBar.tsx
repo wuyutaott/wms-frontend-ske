@@ -291,7 +291,7 @@ export default function TabsBar({ openTabs, onCloseTab, pathToLabel }: TabsBarPr
           {moreOpen &&
             createPortal(
               <div
-                className="fixed z-[100] min-w-[180px] rounded-md border border-sidebar-border bg-sidebar py-1 shadow-lg"
+                className="fixed z-[100] min-w-[180px] rounded-md border border-border bg-white py-1 text-foreground shadow-lg"
                 style={{ top: dropdownPosition.top, right: dropdownPosition.right }}
                 onMouseEnter={cancelClose}
                 onMouseLeave={scheduleClose}
@@ -306,8 +306,8 @@ export default function TabsBar({ openTabs, onCloseTab, pathToLabel }: TabsBarPr
                       className={cn(
                         'flex cursor-pointer items-center justify-between gap-2 px-3 py-2 text-sm',
                         isActive
-                          ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                          : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                          ? 'bg-muted text-foreground'
+                          : 'text-foreground hover:bg-muted'
                       )}
                       onClick={() => handleOverflowTabSelect(path)}
                     >
@@ -316,7 +316,7 @@ export default function TabsBar({ openTabs, onCloseTab, pathToLabel }: TabsBarPr
                         role="button"
                         tabIndex={0}
                         aria-label="关闭"
-                        className="rounded p-0.5 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                        className="rounded p-0.5 hover:bg-gray-200"
                         onClick={(e) => {
                           e.stopPropagation()
                           handleClose(e, path)
