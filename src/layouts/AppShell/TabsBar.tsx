@@ -1,15 +1,14 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { X } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/shared/utils/cn'
 
-interface TabBarProps {
+interface TabsBarProps {
   openTabs: string[]
   onCloseTab: (path: string) => void
-  /** path -> 标签文案，用于 Tab 显示 */
   pathToLabel: Record<string, string>
 }
 
-export default function TabBar({ openTabs, onCloseTab, pathToLabel }: TabBarProps) {
+export default function TabsBar({ openTabs, onCloseTab, pathToLabel }: TabsBarProps) {
   const location = useLocation()
   const navigate = useNavigate()
   const currentPath = location.pathname
@@ -24,14 +23,17 @@ export default function TabBar({ openTabs, onCloseTab, pathToLabel }: TabBarProp
   }
 
   function getTabLabel(path: string) {
+    if (path === '/') return '首页'
     return pathToLabel[path] ?? path
   }
 
-  if (openTabs.length === 0) return null
+  // 不展示根路径 "/" 的 Tab，避免出现只显示 "/" 的异常 Tab
+  const tabsToShow = openTabs.filter((p) => p !== '/')
+  if (tabsToShow.length === 0) return null
 
   return (
     <div className="flex shrink-0 items-center gap-0.5 border-b border-sidebar-border px-2 py-1">
-      {openTabs.map((path) => {
+      {tabsToShow.map((path) => {
         const isActive = currentPath === path
         return (
           <button

@@ -13,18 +13,17 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   SidebarRail,
-} from "@/components/ui/sidebar"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { cn } from '@/lib/utils'
-import type { SidebarItem } from '@/types/nav'
-import { iconMap } from '@/config/navConfig'
+} from '@/shared/ui/sidebar'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui/collapsible'
+import { cn } from '@/shared/utils/cn'
+import type { SidebarItem } from './types'
+import { iconMap } from './navConfig'
 
 function isPathActive(pathname: string, path: string): boolean {
   if (path === '/') return pathname === '/'
   return pathname === path || pathname.startsWith(path + '/')
 }
 
-/** 与 SidebarMenuButton 同级的可展开项，视觉与「首页」一致 */
 const triggerClass = cn(
   "flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-hidden ring-sidebar-ring transition-[width,height,padding]",
   "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2",
@@ -77,11 +76,11 @@ function SidebarNavGroup({
   )
 }
 
-interface AppSidebarProps {
+interface SidebarProps {
   items: SidebarItem[]
 }
 
-export default function AppSidebar({ items }: AppSidebarProps) {
+export default function AppShellSidebar({ items }: SidebarProps) {
   const location = useLocation()
   const pathname = location.pathname
 
