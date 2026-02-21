@@ -247,8 +247,8 @@ export default function TabsBar({ openTabs, onCloseTab, pathToLabel }: TabsBarPr
         ))}
       </div>
 
-      {/* 可见 Tab 区域：单行不换行，超出隐藏 */}
-      <div className="flex min-w-0 flex-1 items-center gap-0.5 overflow-hidden px-2 py-1">
+      {/* 可见 Tab 区域：单行不换行，超出隐藏；无垂直 padding，贴底 */}
+      <div className="flex min-w-0 flex-1 items-stretch gap-0.5 overflow-hidden px-2">
         {visibleTabs.map((path) => (
           <TabButton
             key={path}
