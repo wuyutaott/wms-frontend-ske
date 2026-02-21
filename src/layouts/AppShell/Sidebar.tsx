@@ -122,9 +122,10 @@ function CollapsedMenuWithPopover({
                 <div key={child.id} role="menuitem">
                   <NavLink
                     to={child.path}
+                    onClick={() => setOpen(false)}
                     className={cn(
                       'flex items-center gap-2 px-3 py-2 text-sm text-foreground outline-hidden transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
-                      active && 'bg-muted'
+                      active && 'bg-sidebar-accent-active text-sidebar-accent-active-foreground'
                     )}
                   >
                     <span>{child.label}</span>
