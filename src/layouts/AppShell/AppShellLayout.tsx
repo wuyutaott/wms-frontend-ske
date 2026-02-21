@@ -38,7 +38,7 @@ export default function AppShellLayout() {
     <SidebarProvider persistentSidebar>
       <AppShellSidebar items={mainMenuItems} />
       <SidebarInset className="overflow-x-auto overflow-y-auto">
-        <div className="flex min-w-[1368px] w-full shrink-0 flex-1 flex-col">
+        <div className="flex min-w-[1120px] w-full shrink-0 flex-1 flex-col">
           <header className="flex shrink-0 flex-col border-b border-sidebar-border bg-sidebar">
             <TabsBar openTabs={openTabs} onCloseTab={handleCloseTab} pathToLabel={pathToLabel} />
           </header>
