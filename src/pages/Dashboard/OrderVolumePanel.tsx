@@ -1,5 +1,18 @@
 import { useState } from 'react'
 import {
+  format,
+  subDays,
+  subMonths,
+  addMonths,
+  addYears,
+  subYears,
+  startOfMonth,
+  endOfMonth,
+  startOfDay,
+} from 'date-fns'
+import { zhCN as dateFnsZhCN } from 'date-fns/locale'
+import { zhCN as dayPickerZhCN } from 'react-day-picker/locale'
+import {
   LineChart,
   Line,
   XAxis,
@@ -8,8 +21,24 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
-import { Info, RefreshCw, Download, Calendar } from 'lucide-react'
+import {
+  Info,
+  RefreshCw,
+  Download,
+  Calendar as CalendarIcon,
+  ChevronsLeft,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsRight,
+} from 'lucide-react'
+import type { DateRange } from 'react-day-picker'
 import { Button } from '@/shared/ui/button'
+import { Calendar } from '@/shared/ui/calendar'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/shared/ui/popover'
 import {
   Tooltip as TooltipRoot,
   TooltipTrigger,
@@ -89,12 +118,15 @@ function XAxisTick({
   y,
   payload,
 }: {
-  x: number
-  y: number
-  payload?: { value: string }
+  x?: number | string
+  y?: number | string
+  payload?: { value?: string }
 }) {
   const value = payload?.value
   if (!value) return null
+  const nx = Number(x)
+  const ny = Number(y)
+  if (Number.isNaN(nx) || Number.isNaN(ny)) return null
   const d = new Date(value)
   const weekNames = ['日', '一', '二', '三', '四', '五', '六']
   const week = weekNames[d.getDay()]
@@ -107,7 +139,7 @@ function XAxisTick({
   const boxX = -boxW / 2
   const boxY = 13 // 框包住文字（fontSize 12，baseline 24 时文字约在 12～24）
   return (
-    <g transform={`translate(${x},${y})`}>
+    <g transform={`translate(${nx},${ny})`}>
       <text x={0} y={0} dy={10} textAnchor="middle" fill="#666" fontSize={12}>
         {dateStr}
       </text>
@@ -218,9 +250,27 @@ function MetricCard({
   )
 }
 
+const defaultRange: DateRange = {
+  from: new Date(2026, 0, 22),
+  to: new Date(2026, 1, 20),
+}
+
+/** 快捷日期范围选项 */
+const QUICK_RANGES = [
+  { label: '最近7天', getValue: () => ({ from: startOfDay(subDays(new Date(), 6)), to: new Date() }) },
+  { label: '最近14天', getValue: () => ({ from: startOfDay(subDays(new Date(), 13)), to: new Date() }) },
+  { label: '最近30天', getValue: () => ({ from: startOfDay(subDays(new Date(), 29)), to: new Date() }) },
+  { label: '本月', getValue: () => ({ from: startOfMonth(new Date()), to: endOfMonth(new Date()) }) },
+  { label: '上月', getValue: () => ({ from: startOfMonth(subMonths(new Date(), 1)), to: endOfMonth(subMonths(new Date(), 1)) }) },
+  { label: '近半年', getValue: () => ({ from: startOfDay(subMonths(new Date(), 6)), to: new Date() }) },
+] as const
+
 export function OrderVolumePanel() {
-  const dateRange = '2026-01-22 → 2026-02-20'
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(defaultRange)
   const [selectedMetric, setSelectedMetric] = useState('一件代发')
+  const [displayMonth, setDisplayMonth] = useState(() =>
+    startOfMonth(defaultRange.from ?? new Date())
+  )
   const chartData = CHART_DATA_BY_METRIC[selectedMetric] ?? CHART_DATA_BY_METRIC[METRICS[0].name]
   const yMax = Math.max(5, ...chartData.map((d) => d.value))
 
@@ -245,10 +295,152 @@ export function OrderVolumePanel() {
             </TooltipRoot>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-muted-foreground">
-              <Calendar className="size-4 shrink-0" />
-              <span>{dateRange}</span>
-            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    'min-w-[240px] justify-start text-left font-normal',
+                    !dateRange?.from && 'text-muted-foreground'
+                  )}
+                >
+                  <CalendarIcon className="mr-2 size-4 shrink-0" />
+                  {dateRange?.from ? (
+                    dateRange.to ? (
+                      <>
+                        {format(dateRange.from, 'yyyy-MM-dd', { locale: dateFnsZhCN })} →{' '}
+                        {format(dateRange.to, 'yyyy-MM-dd', { locale: dateFnsZhCN })}
+                      </>
+                    ) : (
+                      format(dateRange.from, 'yyyy-MM-dd', { locale: dateFnsZhCN })
+                    )
+                  ) : (
+                    '选择开始与结束日期'
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="p-0"
+                align="end"
+                sideOffset={8}
+                style={{ width: 756, height: 343 }}
+              >
+                <div className="flex h-full w-full">
+                  {/* 左侧快捷选项：宽度 120px，右边竖线即定位在 120 */}
+                  <div className="flex w-[120px] shrink-0 flex-col border-r border-border py-3">
+                    {QUICK_RANGES.map(({ label, getValue }) => (
+                      <button
+                        key={label}
+                        type="button"
+                        className="min-w-[100px] px-4 py-2 text-left text-sm text-foreground hover:bg-muted/60"
+                        onClick={() => {
+                          const { from, to } = getValue()
+                          setDateRange({ from, to })
+                        }}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  {/* 右侧双月日历：自定义标题行（上一年/上个月/下个月/下一年）+ 双月网格 */}
+                  <div className="relative flex min-h-0 flex-1 flex-col pt-[2px] px-2 pb-3">
+                    {/* 自定义日期导航：左 [上一年][上个月] 中 [月份] 右 [下个月][下一年] */}
+                    <div className="flex h-[40px] shrink-0 items-center justify-between gap-2">
+                      <div className="flex items-center gap-0.5">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="size-8 shrink-0"
+                          aria-label="上一年"
+                          onClick={() =>
+                            setDisplayMonth((m) => subYears(m, 1))
+                          }
+                        >
+                          <ChevronsLeft className="size-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="size-8 shrink-0"
+                          aria-label="上个月"
+                          onClick={() =>
+                            setDisplayMonth((m) => subMonths(m, 1))
+                          }
+                        >
+                          <ChevronLeft className="size-4" />
+                        </Button>
+                      </div>
+                      <div
+                        className="grid flex-1 grid-cols-2 items-center text-sm font-black leading-none tracking-widest text-foreground"
+                        aria-hidden
+                      >
+                        <span className="flex justify-center -translate-x-[38px]">
+                          {format(displayMonth, 'yyyy年M月', {
+                            locale: dateFnsZhCN,
+                          })}
+                        </span>
+                        <span className="flex justify-center translate-x-[38px]">
+                          {format(addMonths(displayMonth, 1), 'yyyy年M月', {
+                            locale: dateFnsZhCN,
+                          })}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-0.5">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="size-8 shrink-0"
+                          aria-label="下个月"
+                          onClick={() =>
+                            setDisplayMonth((m) => addMonths(m, 1))
+                          }
+                        >
+                          <ChevronRight className="size-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="size-8 shrink-0"
+                          aria-label="下一年"
+                          onClick={() =>
+                            setDisplayMonth((m) => addYears(m, 1))
+                          }
+                        >
+                          <ChevronsRight className="size-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div
+                      className="absolute left-0 right-0 top-[42px] z-10 h-px bg-border"
+                      aria-hidden
+                    />
+                    <Calendar
+                      className="h-full min-h-0 w-full flex-1 flex flex-col px-2"
+                      mode="range"
+                      month={displayMonth}
+                      onMonthChange={(m) => m && setDisplayMonth(m)}
+                      selected={dateRange}
+                      onSelect={setDateRange}
+                      numberOfMonths={2}
+                      fixedWeeks
+                      locale={dayPickerZhCN}
+                      hideNavigation
+                      classNames={{
+                        month_caption: 'hidden',
+                      }}
+                      formatters={{
+                        formatMonthCaption: (month) =>
+                          format(month, 'yyyy年M月', { locale: dateFnsZhCN }),
+                      }}
+                    />
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
             <div className="flex gap-1">
               <Button variant="ghost" size="icon-sm" aria-label="刷新">
                 <RefreshCw className="size-4" />
@@ -290,7 +482,7 @@ export function OrderVolumePanel() {
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(214.3 31.8% 91.4%)" />
               <XAxis
                 dataKey="date"
-                tick={<XAxisTick />}
+                tick={(props) => <XAxisTick {...props} />}
                 interval={0}
               />
               <YAxis
