@@ -33,6 +33,9 @@ const SIDEBAR_WIDTH_ICON = "3rem"
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 /** 持久化 Sidebar 模式下的固定宽度（不随视口响应式折叠） */
 const PERSISTENT_SIDEBAR_WIDTH = "240px"
+/** 侧边栏展开/收起动画：时长与缓动，左侧与右侧保持一致 */
+const SIDEBAR_TRANSITION = "transition-[width,flex-basis,min-width] duration-200 ease-in-out"
+const SIDEBAR_INSET_TRANSITION = "transition-[width,margin-left] duration-200 ease-in-out"
 
 type SidebarContextProps = {
   state: "expanded" | "collapsed"
@@ -222,9 +225,12 @@ function Sidebar({
     <div
       className={cn(
         "group peer text-sidebar-foreground",
-        alwaysVisible ? "block shrink-0 w-(--sidebar-width) min-w-(--sidebar-width)" : "hidden md:block"
+        alwaysVisible && `flex shrink-0 basis-(--sidebar-width) w-(--sidebar-width) min-w-(--sidebar-width) ${SIDEBAR_TRANSITION}`,
+        alwaysVisible && variant === "inset" && "data-[state=collapsed]:data-[collapsible=icon]:basis-[calc(var(--sidebar-width-icon)+(--spacing(4)))] data-[state=collapsed]:data-[collapsible=icon]:min-w-[calc(var(--sidebar-width-icon)+(--spacing(4)))] data-[state=collapsed]:data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4)))]",
+        alwaysVisible && variant === "floating" && "data-[state=collapsed]:data-[collapsible=icon]:basis-[calc(var(--sidebar-width-icon)+(--spacing(4)))] data-[state=collapsed]:data-[collapsible=icon]:min-w-[calc(var(--sidebar-width-icon)+(--spacing(4)))] data-[state=collapsed]:data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4)))]",
+        alwaysVisible && (variant === "sidebar" || !variant) && "data-[state=collapsed]:data-[collapsible=icon]:basis-(--sidebar-width-icon) data-[state=collapsed]:data-[collapsible=icon]:min-w-(--sidebar-width-icon) data-[state=collapsed]:data-[collapsible=icon]:w-(--sidebar-width-icon)",
+        !alwaysVisible && "hidden md:block"
       )}
-      style={alwaysVisible ? { flex: "0 0 var(--sidebar-width)" } : undefined}
       data-state={state}
       data-collapsible={state === "collapsed" ? collapsible : ""}
       data-variant={variant}
@@ -235,7 +241,7 @@ function Sidebar({
       <div
         data-slot="sidebar-gap"
         className={cn(
-          "relative w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear",
+          `relative w-(--sidebar-width) bg-transparent ${SIDEBAR_TRANSITION}`,
           "group-data-[collapsible=offcanvas]:w-0",
           "group-data-[side=right]:rotate-180",
           variant === "floating" || variant === "inset"
@@ -246,7 +252,7 @@ function Sidebar({
       <div
         data-slot="sidebar-container"
         className={cn(
-          "fixed inset-y-0 z-10 h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear",
+          `fixed inset-y-0 z-10 h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-in-out`,
           alwaysVisible ? "flex" : "hidden md:flex",
           side === "left"
             ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
@@ -328,6 +334,7 @@ function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
       data-slot="sidebar-inset"
       className={cn(
         "bg-background relative flex min-w-0 flex-1 flex-col overflow-auto",
+        SIDEBAR_INSET_TRANSITION,
         "peer-data-[variant=inset]:m-2 peer-data-[variant=inset]:ml-0 peer-data-[variant=inset]:rounded-b-xl peer-data-[variant=inset]:shadow-sm peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2",
         className
       )}
