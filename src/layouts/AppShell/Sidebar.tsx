@@ -38,9 +38,9 @@ const triggerClass = cn(
   "[&>svg]:size-4 [&>svg]:shrink-0 [&>span]:min-w-0 [&>span]:truncate [&>span]:whitespace-nowrap"
 )
 
-/** 收缩状态下带弹出菜单的一级项按钮：仅图标+无障碍文案，不隐藏图标（不用 triggerClass 的 [&>svg:last-of-type]:hidden） */
+/** 收缩状态下带弹出菜单的一级项按钮：仅图标+无障碍文案，左对齐与无子菜单项一致 */
 const collapsedPopoverTriggerClass = cn(
-  "flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md text-left text-sm outline-hidden ring-sidebar-ring transition-[width,padding] duration-200 ease-linear",
+  "flex size-8 shrink-0 items-center justify-start overflow-hidden rounded-md p-2 text-left text-sm outline-hidden ring-sidebar-ring transition-[width,padding] duration-200 ease-linear",
   "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2",
   "[&>svg]:size-4 [&>svg]:shrink-0"
 )
@@ -87,7 +87,7 @@ function CollapsedMenuWithPopover({
   return (
     <>
       <div
-        className="relative flex h-8 w-full min-w-8 items-center justify-center"
+        className="relative flex h-8 w-full min-w-8 items-center justify-start"
         onMouseEnter={openPopover}
         onMouseLeave={scheduleClose}
       >
