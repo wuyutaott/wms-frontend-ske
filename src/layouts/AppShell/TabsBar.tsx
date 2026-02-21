@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { ChevronDown, X } from 'lucide-react'
+import { ChevronDown, Search, X } from 'lucide-react'
 import { cn } from '@/shared/utils/cn'
 
 const TAB_BAR_HEIGHT = 40
@@ -323,6 +323,17 @@ export default function TabsBar({ openTabs, onCloseTab, pathToLabel }: TabsBarPr
             )}
         </div>
       )}
+
+      {/* 最右侧搜索图标 */}
+      <div className="ml-2 flex shrink-0 items-center pr-2">
+        <button
+          type="button"
+          className="flex size-8 items-center justify-center rounded-full bg-white/20 text-sm text-sidebar-foreground/80 transition-colors hover:bg-white/20 hover:text-sidebar-accent-foreground"
+          aria-label="搜索"
+        >
+          <Search className="size-4" />
+        </button>
+      </div>
     </div>
   )
 }
