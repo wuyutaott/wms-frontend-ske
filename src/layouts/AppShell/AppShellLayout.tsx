@@ -35,7 +35,7 @@ export default function AppShellLayout() {
   }
 
   return (
-    <SidebarProvider>
+    <SidebarProvider persistentSidebar>
       <AppShellSidebar items={mainMenuItems} />
       <SidebarInset>
         <TopBar openTabs={openTabs} onCloseTab={handleCloseTab} pathToLabel={pathToLabel} />

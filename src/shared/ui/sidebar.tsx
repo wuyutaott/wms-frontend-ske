@@ -31,6 +31,8 @@ const SIDEBAR_WIDTH = "16rem"
 const SIDEBAR_WIDTH_MOBILE = "18rem"
 const SIDEBAR_WIDTH_ICON = "3rem"
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
+/** 持久化 Sidebar 模式下的固定宽度（不随视口响应式折叠） */
+const PERSISTENT_SIDEBAR_WIDTH = "240px"
 
 type SidebarContextProps = {
   state: "expanded" | "collapsed"
@@ -39,6 +41,8 @@ type SidebarContextProps = {
   openMobile: boolean
   setOpenMobile: (open: boolean) => void
   isMobile: boolean
+  /** 为 true 时仅允许用户操作折叠，不随窗口宽度自动折叠/不变成 drawer */
+  persistentSidebar: boolean
   toggleSidebar: () => void
 }
 
@@ -57,6 +61,7 @@ function SidebarProvider({
   defaultOpen = true,
   open: openProp,
   onOpenChange: setOpenProp,
+  persistentSidebar = false,
   className,
   style,
   children,
@@ -65,6 +70,8 @@ function SidebarProvider({
   defaultOpen?: boolean
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  /** 为 true 时禁止响应式自动折叠：仅用户操作可折叠，窗口变窄也不变 drawer/不隐藏 */
+  persistentSidebar?: boolean
 }) {
   const isMobile = useIsMobile()
   const [openMobile, setOpenMobile] = React.useState(false)
@@ -88,10 +95,10 @@ function SidebarProvider({
     [setOpenProp, open]
   )
 
-  // Helper to toggle the sidebar.
+  // Helper to toggle the sidebar. persistentSidebar 时仅用 setOpen，不随视口变 drawer
   const toggleSidebar = React.useCallback(() => {
-    return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open)
-  }, [isMobile, setOpen, setOpenMobile])
+    return persistentSidebar ? setOpen((open) => !open) : (isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open))
+  }, [persistentSidebar, isMobile, setOpen, setOpenMobile])
 
   // Adds a keyboard shortcut to toggle the sidebar.
   React.useEffect(() => {
@@ -112,18 +119,21 @@ function SidebarProvider({
   // We add a state so that we can do data-state="expanded" or "collapsed".
   // This makes it easier to style the sidebar with Tailwind classes.
   const state = open ? "expanded" : "collapsed"
+  // persistentSidebar 时对 sidebar 组件视为非 mobile，不切换 drawer、不随视口折叠
+  const isMobileForSidebar = persistentSidebar ? false : isMobile
 
   const contextValue = React.useMemo<SidebarContextProps>(
     () => ({
       state,
       open,
       setOpen,
-      isMobile,
+      isMobile: isMobileForSidebar,
       openMobile,
       setOpenMobile,
+      persistentSidebar,
       toggleSidebar,
     }),
-    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
+    [state, open, setOpen, isMobileForSidebar, openMobile, setOpenMobile, persistentSidebar, toggleSidebar]
   )
 
   return (
@@ -133,7 +143,7 @@ function SidebarProvider({
           data-slot="sidebar-wrapper"
           style={
             {
-              "--sidebar-width": SIDEBAR_WIDTH,
+              "--sidebar-width": persistentSidebar ? PERSISTENT_SIDEBAR_WIDTH : SIDEBAR_WIDTH,
               "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
               ...style,
             } as React.CSSProperties
@@ -163,7 +173,7 @@ function Sidebar({
   variant?: "sidebar" | "floating" | "inset"
   collapsible?: "offcanvas" | "icon" | "none"
 }) {
-  const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+  const { isMobile, state, openMobile, setOpenMobile, persistentSidebar } = useSidebar()
 
   if (collapsible === "none") {
     return (
@@ -171,6 +181,7 @@ function Sidebar({
         data-slot="sidebar"
         className={cn(
           "bg-sidebar text-sidebar-foreground flex h-full w-(--sidebar-width) flex-col",
+          persistentSidebar && "shrink-0 min-w-(--sidebar-width)",
           className
         )}
         {...props}
@@ -205,9 +216,15 @@ function Sidebar({
     )
   }
 
+  const alwaysVisible = persistentSidebar
+
   return (
     <div
-      className="group peer text-sidebar-foreground hidden md:block"
+      className={cn(
+        "group peer text-sidebar-foreground",
+        alwaysVisible ? "block shrink-0 w-(--sidebar-width) min-w-(--sidebar-width)" : "hidden md:block"
+      )}
+      style={alwaysVisible ? { flex: "0 0 var(--sidebar-width)" } : undefined}
       data-state={state}
       data-collapsible={state === "collapsed" ? collapsible : ""}
       data-variant={variant}
@@ -229,7 +246,8 @@ function Sidebar({
       <div
         data-slot="sidebar-container"
         className={cn(
-          "fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex",
+          "fixed inset-y-0 z-10 h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear",
+          alwaysVisible ? "flex" : "hidden md:flex",
           side === "left"
             ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
             : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
@@ -309,7 +327,7 @@ function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
     <main
       data-slot="sidebar-inset"
       className={cn(
-        "bg-background relative flex w-full flex-1 flex-col",
+        "bg-background relative flex min-w-0 flex-1 flex-col overflow-auto",
         "md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2",
         className
       )}
