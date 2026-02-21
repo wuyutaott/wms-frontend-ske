@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { NavLink, useLocation } from 'react-router-dom'
 import { ChevronDown } from 'lucide-react'
@@ -144,9 +144,13 @@ function CollapsedMenuWithPopover({
 function SidebarNavGroup({
   item,
   pathname,
+  open,
+  onOpenChange,
 }: {
   item: SidebarItem
   pathname: string
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }) {
   const { state: sidebarState } = useSidebar()
   const hasChildren = item.children && item.children.length > 0
@@ -160,14 +164,11 @@ function SidebarNavGroup({
     )
   }
 
-  const hasActiveChild =
-    item.children?.some((c) => isPathActive(pathname, c.path)) ?? false
-  const [open, setOpen] = useState(hasActiveChild || isPathActive(pathname, item.path))
   const Icon = item.icon ? iconMap[item.icon] : null
 
   return (
     <SidebarMenuItem>
-      <Collapsible open={open} onOpenChange={setOpen} className="group/collapsible">
+      <Collapsible open={open} onOpenChange={onOpenChange} className="group/collapsible">
         <CollapsibleTrigger className={triggerClass}>
           {Icon && <Icon className="size-4 shrink-0" />}
           <span>{item.label}</span>
@@ -202,10 +203,29 @@ interface SidebarProps {
   items: SidebarItem[]
 }
 
+/** 当前展开的一级菜单 id，同一时间只允许一个 */
+function useOpenGroupId(items: SidebarItem[], pathname: string) {
+  const [openGroupId, setOpenGroupId] = useState<string | null>(null)
+
+  useEffect(() => {
+    const id =
+      items.find(
+        (item) =>
+          item.children?.length &&
+          (isPathActive(pathname, item.path) ||
+            item.children.some((c) => isPathActive(pathname, c.path)))
+      )?.id ?? null
+    setOpenGroupId((prev) => (id != null ? id : prev))
+  }, [pathname, items])
+
+  return [openGroupId, setOpenGroupId] as const
+}
+
 export default function AppShellSidebar({ items }: SidebarProps) {
   const location = useLocation()
   const pathname = location.pathname
   const { state } = useSidebar()
+  const [openGroupId, setOpenGroupId] = useOpenGroupId(items, pathname)
 
   return (
     <Sidebar variant="inset" collapsible="icon">
@@ -230,6 +250,8 @@ export default function AppShellSidebar({ items }: SidebarProps) {
                     key={item.id}
                     item={item}
                     pathname={pathname}
+                    open={openGroupId === item.id}
+                    onOpenChange={(open) => setOpenGroupId(open ? item.id : null)}
                   />
                 )
               }
