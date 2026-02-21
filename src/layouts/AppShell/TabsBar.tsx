@@ -72,9 +72,8 @@ export default function TabsBar({ openTabs, onCloseTab, pathToLabel }: TabsBarPr
   const navigate = useNavigate()
   const currentPath = location.pathname
 
+  // 过滤掉根路径占位符；按打开顺序排列，最新打开的在最右侧
   const tabsToShow = useMemo(() => openTabs.filter((p) => p !== '/'), [openTabs])
-  // 按打开顺序排列，不排序：最新打开的在最右侧
-  const tabOrder = tabsToShow
 
   const containerRef = useRef<HTMLDivElement>(null)
   const measureRef = useRef<HTMLDivElement>(null)
@@ -100,8 +99,8 @@ export default function TabsBar({ openTabs, onCloseTab, pathToLabel }: TabsBarPr
   const updateVisibleOverflow = useCallback(() => {
     const container = containerRef.current
     const measureRow = measureRef.current
-    if (!container || !measureRow || tabOrder.length === 0) {
-      setVisibleTabs(tabOrder)
+    if (!container || !measureRow || tabsToShow.length === 0) {
+      setVisibleTabs(tabsToShow)
       setOverflowTabs([])
       return
     }
@@ -111,7 +110,7 @@ export default function TabsBar({ openTabs, onCloseTab, pathToLabel }: TabsBarPr
       containerRect.width - MORE_BUTTON_WIDTH - HORIZONTAL_PADDING * 2
     const children = measureRow.children
     if (children.length === 0) {
-      setVisibleTabs(tabOrder)
+      setVisibleTabs(tabsToShow)
       setOverflowTabs([])
       return
     }
@@ -122,13 +121,13 @@ export default function TabsBar({ openTabs, onCloseTab, pathToLabel }: TabsBarPr
     // 第一轮：按打开顺序从左到右填满，得到默认的 visible / overflow
     let used = 0
     const defaultVisible: string[] = []
-    for (let i = 0; i < tabOrder.length; i++) {
+    for (let i = 0; i < tabsToShow.length; i++) {
       const w = getTabWidth(i)
       if (defaultVisible.length > 0 && used + w > availableWidth) break
-      defaultVisible.push(tabOrder[i])
+      defaultVisible.push(tabsToShow[i])
       used += w
     }
-    const defaultOverflow = tabOrder.filter((p) => !defaultVisible.includes(p))
+    const defaultOverflow = tabsToShow.filter((p) => !defaultVisible.includes(p))
 
     // 若当前页已在可见区：不做任何位置移动，保持默认划分
     if (defaultVisible.includes(currentPath)) {
@@ -138,7 +137,7 @@ export default function TabsBar({ openTabs, onCloseTab, pathToLabel }: TabsBarPr
     }
 
     // 当前页在折叠区（新打开的 tab 或从折叠菜单选中的页）：把当前页放到可见区最后一个，原最后一个可见进折叠
-    const currentIndex = tabOrder.indexOf(currentPath)
+    const currentIndex = tabsToShow.indexOf(currentPath)
     if (currentIndex < 0) {
       setVisibleTabs(defaultVisible)
       setOverflowTabs(defaultOverflow)
@@ -148,17 +147,17 @@ export default function TabsBar({ openTabs, onCloseTab, pathToLabel }: TabsBarPr
     const availableForLeft = availableWidth - currentWidth
     const leftTabs: string[] = []
     let usedLeft = 0
-    for (let i = 0; i < tabOrder.length; i++) {
-      if (tabOrder[i] === currentPath) continue
+    for (let i = 0; i < tabsToShow.length; i++) {
+      if (tabsToShow[i] === currentPath) continue
       const w = getTabWidth(i)
       if (usedLeft + w > availableForLeft) break
-      leftTabs.push(tabOrder[i])
+      leftTabs.push(tabsToShow[i])
       usedLeft += w
     }
     const visible = [...leftTabs, currentPath]
     setVisibleTabs(visible)
-    setOverflowTabs(tabOrder.filter((p) => !visible.includes(p)))
-  }, [tabOrder, currentPath])
+    setOverflowTabs(tabsToShow.filter((p) => !visible.includes(p)))
+  }, [tabsToShow, currentPath])
 
   useEffect(() => {
     updateVisibleOverflow()
@@ -172,16 +171,8 @@ export default function TabsBar({ openTabs, onCloseTab, pathToLabel }: TabsBarPr
     return () => ro.disconnect()
   }, [updateVisibleOverflow])
 
-  const handleTabClick = useCallback(
-    (path: string) => {
-      navigate(path)
-      setMoreOpen(false)
-    },
-    [navigate]
-  )
-
-  /** 从折叠菜单选中：导航后由 updateVisibleOverflow 根据「当前页在折叠区」自动把该 tab 放到可见区最后 */
-  const handleOverflowTabSelect = useCallback(
+  /** 选中 tab（含折叠区）：导航后由 updateVisibleOverflow 自动把当前页移到可见区 */
+  const handleTabSelect = useCallback(
     (path: string) => {
       navigate(path)
       setMoreOpen(false)
@@ -235,7 +226,7 @@ export default function TabsBar({ openTabs, onCloseTab, pathToLabel }: TabsBarPr
         className="pointer-events-none invisible absolute left-0 top-0 flex items-center gap-0.5"
         style={{ visibility: 'hidden' }}
       >
-        {tabOrder.map((path) => (
+        {tabsToShow.map((path) => (
           <TabButton
             key={path}
             path={path}
@@ -255,7 +246,7 @@ export default function TabsBar({ openTabs, onCloseTab, pathToLabel }: TabsBarPr
             path={path}
             label={getTabLabel(path, pathToLabel)}
             isActive={currentPath === path}
-            onSelect={() => handleTabClick(path)}
+            onSelect={() => handleTabSelect(path)}
             onClose={(e) => handleClose(e, path)}
           />
         ))}
@@ -309,7 +300,7 @@ export default function TabsBar({ openTabs, onCloseTab, pathToLabel }: TabsBarPr
                           ? 'bg-muted text-foreground'
                           : 'text-foreground hover:bg-muted'
                       )}
-                      onClick={() => handleOverflowTabSelect(path)}
+                      onClick={() => handleTabSelect(path)}
                     >
                       <span className="truncate">{getTabLabel(path, pathToLabel)}</span>
                       <span

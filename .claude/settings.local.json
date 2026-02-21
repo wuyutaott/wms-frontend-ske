@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__serena__list_dir",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(grep:*)",
+      "Bash(git stash:*)"
+    ]
+  }
+}

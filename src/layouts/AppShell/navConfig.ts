@@ -19,7 +19,7 @@ export const iconMap: Record<string, ComponentType<{ className?: string; size?: 
 }
 
 export const mainMenuItems: SidebarItem[] = [
-  { id: 'home', label: '首页', path: '/dashboard', icon: 'LayoutDashboard', children: [] },
+  { id: 'home', label: '首页', path: '/dashboard', icon: 'LayoutDashboard' },
   {
     id: 'inbound',
     label: '入库',
@@ -53,9 +53,9 @@ export const mainMenuItems: SidebarItem[] = [
       { id: 'cutoff', label: '截单', path: '/outbound/cutoff', icon: 'FileText' },
     ],
   },
-  { id: 'returns', label: '退件', path: '/returns', icon: 'Package', children: [] },
-  { id: 'transfer', label: '转运', path: '/transfer', icon: 'Package', children: [] },
-  { id: 'work-order', label: '工单', path: '/work-order', icon: 'FileText', children: [] },
+  { id: 'returns', label: '退件', path: '/returns', icon: 'Package' },
+  { id: 'transfer', label: '转运', path: '/transfer', icon: 'Package' },
+  { id: 'work-order', label: '工单', path: '/work-order', icon: 'FileText' },
   {
     id: 'reports',
     label: '报表',

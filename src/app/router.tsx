@@ -1,43 +1,59 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import AppShellLayout from '@/layouts/AppShell/AppShellLayout'
+
+// 首页
 import DashboardPage from '@/pages/Dashboard'
+
+// 入库
 import InboundPendingPage from '@/pages/Inbound/Pending'
 import InboundScanPage from '@/pages/Inbound/Scan'
 import InboundClaimPage from '@/pages/Inbound/Claim'
 import PutawayTasksPage from '@/pages/Putaway/Tasks'
-import OutboundOneClickPage from '@/pages/outbound/OneClick'
-import OutboundStockTransferPage from '@/pages/outbound/StockTransfer'
-import OutboundWavePage from '@/pages/outbound/Wave'
-import OutboundSecondSortPage from '@/pages/outbound/SecondSort'
-import OutboundCompoundCheckPage from '@/pages/outbound/CompoundCheck'
-import OutboundParcelReviewPage from '@/pages/outbound/ParcelReview'
-import OutboundWeighPage from '@/pages/outbound/Weigh'
-import OutboundRelabelPage from '@/pages/outbound/Relabel'
-import OutboundLogisticsPackPage from '@/pages/outbound/LogisticsPack'
-import OutboundChangeOrderPage from '@/pages/outbound/ChangeOrder'
-import OutboundExceptionPage from '@/pages/outbound/Exception'
-import OutboundCutoffPage from '@/pages/outbound/Cutoff'
 import ProductsListPage from '@/pages/Products/List'
-import SettingsPage from '@/pages/Settings'
-import ReturnsPage from '@/pages/Returns'
-import TransferPage from '@/pages/Transfer'
-import WorkOrderPage from '@/pages/WorkOrder'
-import ReportsEfficiencyBoardPage from '@/pages/reports/EfficiencyBoard'
-import ReportsInboundEfficiencyPage from '@/pages/reports/InboundEfficiency'
-import ReportsOutboundEfficiencyPage from '@/pages/reports/OutboundEfficiency'
+
+// 出库
+import OutboundOneClickPage from '@/pages/Outbound/OneClick'
+import OutboundStockTransferPage from '@/pages/Outbound/StockTransfer'
+import OutboundWavePage from '@/pages/Outbound/Wave'
+import OutboundSecondSortPage from '@/pages/Outbound/SecondSort'
+import OutboundCompoundCheckPage from '@/pages/Outbound/CompoundCheck'
+import OutboundParcelReviewPage from '@/pages/Outbound/ParcelReview'
+import OutboundWeighPage from '@/pages/Outbound/Weigh'
+import OutboundRelabelPage from '@/pages/Outbound/Relabel'
+import OutboundLogisticsPackPage from '@/pages/Outbound/LogisticsPack'
+import OutboundChangeOrderPage from '@/pages/Outbound/ChangeOrder'
+import OutboundExceptionPage from '@/pages/Outbound/Exception'
+import OutboundCutoffPage from '@/pages/Outbound/Cutoff'
+
+// 库内
+import InStockProductPage from '@/pages/InStock/ProductInventory'
+import InStockBoxPage from '@/pages/InStock/BoxInventory'
+import InStockReturnPage from '@/pages/InStock/ReturnInventory'
+import InStockDefectivePage from '@/pages/InStock/DefectiveHandling'
+import InStockCheckPage from '@/pages/InStock/InventoryCheck'
+
+// FBA 退货
 import FbaReturnInboundPage from '@/pages/FbaReturns/ReturnInbound'
 import FbaRelabelServicePage from '@/pages/FbaReturns/RelabelService'
 import FbaReturnOutboundPage from '@/pages/FbaReturns/ReturnOutbound'
-import InStockProductPage from '@/pages/instock/ProductInventory'
-import InStockBoxPage from '@/pages/instock/BoxInventory'
-import InStockReturnPage from '@/pages/instock/ReturnInventory'
-import InStockDefectivePage from '@/pages/instock/DefectiveHandling'
-import InStockCheckPage from '@/pages/instock/InventoryCheck'
+
+// 基础数据
 import BasicProductPage from '@/pages/BasicData/Product'
 import BasicWarehouseAreaPage from '@/pages/BasicData/WarehouseArea'
 import BasicLocationPage from '@/pages/BasicData/Location'
 import BasicPackagingPage from '@/pages/BasicData/Packaging'
 import BasicSeedingWallPage from '@/pages/BasicData/SeedingWall'
+
+// 报表
+import ReportsEfficiencyBoardPage from '@/pages/Reports/EfficiencyBoard'
+import ReportsInboundEfficiencyPage from '@/pages/Reports/InboundEfficiency'
+import ReportsOutboundEfficiencyPage from '@/pages/Reports/OutboundEfficiency'
+
+// 独立功能页
+import ReturnsPage from '@/pages/Returns'
+import TransferPage from '@/pages/Transfer'
+import WorkOrderPage from '@/pages/WorkOrder'
+import SettingsPage from '@/pages/Settings'
 
 export function Router() {
   return (

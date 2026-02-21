@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { SidebarInset, SidebarProvider } from '@/shared/ui/sidebar'
 import AppShellSidebar from './Sidebar'
-import TopBar from './TopBar'
+import TabsBar from './TabsBar'
 import { mainMenuItems, buildPathToLabel } from './navConfig'
 
 export default function AppShellLayout() {
@@ -38,7 +38,9 @@ export default function AppShellLayout() {
     <SidebarProvider persistentSidebar>
       <AppShellSidebar items={mainMenuItems} />
       <SidebarInset>
-        <TopBar openTabs={openTabs} onCloseTab={handleCloseTab} pathToLabel={pathToLabel} />
+        <header className="flex shrink-0 flex-col border-b border-sidebar-border bg-sidebar">
+          <TabsBar openTabs={openTabs} onCloseTab={handleCloseTab} pathToLabel={pathToLabel} />
+        </header>
         <main className="min-w-0 flex-1 overflow-auto p-6">
           <Outlet />
         </main>
