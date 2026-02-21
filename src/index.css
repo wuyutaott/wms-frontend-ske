@@ -85,6 +85,33 @@ h1 {
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
 }
 
+/* 左侧一级菜单展开/收起动画，0.25s */
+.sidebar-collapsible-content {
+  overflow: hidden;
+}
+.sidebar-collapsible-content[data-state="open"] {
+  animation: sidebar-collapsible-down 250ms ease-out;
+}
+.sidebar-collapsible-content[data-state="closed"] {
+  animation: sidebar-collapsible-up 250ms ease-out;
+}
+@keyframes sidebar-collapsible-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-collapsible-content-height);
+  }
+}
+@keyframes sidebar-collapsible-up {
+  from {
+    height: var(--radix-collapsible-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

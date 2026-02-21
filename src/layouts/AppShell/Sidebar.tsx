@@ -170,9 +170,9 @@ function SidebarNavGroup({
         <CollapsibleTrigger className={triggerClass}>
           {Icon && <Icon className="size-4 shrink-0" />}
           <span>{item.label}</span>
-          <ChevronDown className="ml-auto size-4 shrink-0 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+          <ChevronDown className="ml-auto size-4 shrink-0 transition-transform duration-[250ms] ease-out group-data-[state=open]/collapsible:rotate-180" />
         </CollapsibleTrigger>
-        <CollapsibleContent>
+        <CollapsibleContent className="sidebar-collapsible-content overflow-hidden">
           <SidebarMenuSub>
             {item.children?.map((child) => (
               <SidebarMenuSubItem key={child.id}>
