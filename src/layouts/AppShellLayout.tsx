@@ -136,7 +136,7 @@ export default function AppShellLayout() {
     <SidebarProvider>
       <AppSidebar items={mainMenuItems} />
       <SidebarInset>
-        <header className="flex shrink-0 flex-col border-b bg-background">
+        <header className="flex shrink-0 flex-col border-b border-sidebar-border bg-sidebar">
           <TabBar openTabs={openTabs} onCloseTab={handleCloseTab} pathToLabel={pathToLabel} />
         </header>
         <main className="flex-1 overflow-auto p-6">
