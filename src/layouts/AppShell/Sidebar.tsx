@@ -117,7 +117,6 @@ function CollapsedMenuWithPopover({
             }}
           >
             {children.map((child) => {
-              const ChildIcon = child.icon ? iconMap[child.icon] : null
               const active = isPathActive(pathname, child.path)
               return (
                 <div key={child.id} role="menuitem">
@@ -128,7 +127,6 @@ function CollapsedMenuWithPopover({
                       active && 'bg-muted'
                     )}
                   >
-                    {ChildIcon && <ChildIcon className="size-4 shrink-0" />}
                     <span>{child.label}</span>
                   </NavLink>
                 </div>
@@ -176,22 +174,18 @@ function SidebarNavGroup({
         </CollapsibleTrigger>
         <CollapsibleContent>
           <SidebarMenuSub>
-            {item.children?.map((child) => {
-              const ChildIcon = child.icon ? iconMap[child.icon] : null
-              return (
-                <SidebarMenuSubItem key={child.id}>
-                  <SidebarMenuSubButton
-                    asChild
-                    isActive={isPathActive(pathname, child.path)}
-                  >
-                    <NavLink to={child.path}>
-                      {ChildIcon && <ChildIcon className="size-4 shrink-0" />}
-                      <span>{child.label}</span>
-                    </NavLink>
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>
-              )
-            })}
+            {item.children?.map((child) => (
+              <SidebarMenuSubItem key={child.id}>
+                <SidebarMenuSubButton
+                  asChild
+                  isActive={isPathActive(pathname, child.path)}
+                >
+                  <NavLink to={child.path}>
+                    <span>{child.label}</span>
+                  </NavLink>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+            ))}
           </SidebarMenuSub>
         </CollapsibleContent>
       </Collapsible>
