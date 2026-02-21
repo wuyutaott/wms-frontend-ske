@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { NavLink, useLocation } from 'react-router-dom'
 import { ChevronDown } from 'lucide-react'
 import {
@@ -21,6 +22,9 @@ import { cn } from '@/shared/utils/cn'
 import type { SidebarItem } from './types'
 import { iconMap } from './navConfig'
 
+const POPOVER_GAP = 4
+const POPOVER_CLOSE_DELAY = 120
+
 function isPathActive(pathname: string, path: string): boolean {
   if (path === '/') return pathname === '/'
   return pathname === path || pathname.startsWith(path + '/')
@@ -34,6 +38,109 @@ const triggerClass = cn(
   "[&>svg]:size-4 [&>svg]:shrink-0 [&>span]:min-w-0 [&>span]:truncate [&>span]:whitespace-nowrap"
 )
 
+/** 收缩状态下带弹出菜单的一级项按钮：仅图标+无障碍文案，不隐藏图标（不用 triggerClass 的 [&>svg:last-of-type]:hidden） */
+const collapsedPopoverTriggerClass = cn(
+  "flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md text-left text-sm outline-hidden ring-sidebar-ring transition-[width,padding] duration-200 ease-linear",
+  "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2",
+  "[&>svg]:size-4 [&>svg]:shrink-0"
+)
+
+/** 收缩状态下：带子菜单的一级项悬停时在右侧弹出二级菜单 */
+function CollapsedMenuWithPopover({
+  item,
+  pathname,
+}: {
+  item: SidebarItem
+  pathname: string
+}) {
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const [open, setOpen] = useState(false)
+  const [position, setPosition] = useState({ top: 0, left: 0 })
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const Icon = item.icon ? iconMap[item.icon] : null
+  const children = item.children ?? []
+
+  const openPopover = useCallback(() => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current)
+      closeTimeoutRef.current = null
+    }
+    const el = triggerRef.current
+    if (el) {
+      const rect = el.getBoundingClientRect()
+      setPosition({ top: rect.top, left: rect.right + POPOVER_GAP })
+      setOpen(true)
+    }
+  }, [])
+
+  const scheduleClose = useCallback(() => {
+    closeTimeoutRef.current = setTimeout(() => setOpen(false), POPOVER_CLOSE_DELAY)
+  }, [])
+
+  const cancelClose = useCallback(() => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current)
+      closeTimeoutRef.current = null
+    }
+  }, [])
+
+  return (
+    <>
+      <div
+        className="relative flex h-8 w-full min-w-8 items-center justify-center"
+        onMouseEnter={openPopover}
+        onMouseLeave={scheduleClose}
+      >
+        <button
+          ref={triggerRef}
+          type="button"
+          className={collapsedPopoverTriggerClass}
+          title={item.label}
+          aria-expanded={open}
+          aria-haspopup="menu"
+        >
+          {Icon && <Icon className="size-4 shrink-0" />}
+          <span className="sr-only">{item.label}</span>
+        </button>
+      </div>
+      {open &&
+        createPortal(
+          <div
+            className="z-[100] min-w-[180px] rounded-md border border-border bg-white py-1 text-foreground shadow-lg"
+            style={{ position: 'fixed', top: position.top, left: position.left }}
+            role="menu"
+            aria-label={item.label}
+            onMouseEnter={cancelClose}
+            onMouseLeave={() => {
+              cancelClose()
+              setOpen(false)
+            }}
+          >
+            {children.map((child) => {
+              const ChildIcon = child.icon ? iconMap[child.icon] : null
+              const active = isPathActive(pathname, child.path)
+              return (
+                <div key={child.id} role="menuitem">
+                  <NavLink
+                    to={child.path}
+                    className={cn(
+                      'flex items-center gap-2 px-3 py-2 text-sm text-foreground outline-hidden transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
+                      active && 'bg-muted'
+                    )}
+                  >
+                    {ChildIcon && <ChildIcon className="size-4 shrink-0" />}
+                    <span>{child.label}</span>
+                  </NavLink>
+                </div>
+              )
+            })}
+          </div>,
+          document.body
+        )}
+    </>
+  )
+}
+
 function SidebarNavGroup({
   item,
   pathname,
@@ -41,6 +148,18 @@ function SidebarNavGroup({
   item: SidebarItem
   pathname: string
 }) {
+  const { state: sidebarState } = useSidebar()
+  const hasChildren = item.children && item.children.length > 0
+  const isCollapsed = sidebarState === 'collapsed'
+
+  if (isCollapsed && hasChildren) {
+    return (
+      <SidebarMenuItem>
+        <CollapsedMenuWithPopover item={item} pathname={pathname} />
+      </SidebarMenuItem>
+    )
+  }
+
   const hasActiveChild =
     item.children?.some((c) => isPathActive(pathname, c.path)) ?? false
   const [open, setOpen] = useState(hasActiveChild || isPathActive(pathname, item.path))
