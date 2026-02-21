@@ -61,7 +61,7 @@ function Calendar({
           'day-range_start',
           // 铺满整格，仅左侧边缘加半圆 → 药丸背景从 day1 左边缘开始
           "before:absolute before:inset-y-0 before:left-0 before:right-0 before:content-[''] before:bg-[#146CFF]/10 before:rounded-l-full",
-          '[&_.day_button]:!bg-[#146CFF] [&_.day_button]:!text-white [&_.day_button:hover]:!bg-[#146CFF]',
+          '[&_.day_button]:!bg-[#146CFF] [&_.day_button]:!text-white [&_.day_button:hover]:!bg-[#146CFF] [&_.day_button]:!shadow-[0_0_0_2px_white,0_0_0_4px_#146CFF]',
         ].join(' '),
         range_middle: [
           'day-range_middle',
@@ -73,7 +73,7 @@ function Calendar({
           'day-range_end',
           // 铺满整格，仅右侧边缘加半圆 → 药丸背景到 day10 右边缘结束
           "before:absolute before:inset-y-0 before:left-0 before:right-0 before:content-[''] before:bg-[#146CFF]/10 before:rounded-r-full",
-          '[&_.day_button]:!bg-[#146CFF] [&_.day_button]:!text-white [&_.day_button:hover]:!bg-[#146CFF]',
+          '[&_.day_button]:!bg-[#146CFF] [&_.day_button]:!text-white [&_.day_button:hover]:!bg-[#146CFF] [&_.day_button]:!shadow-[0_0_0_2px_white,0_0_0_4px_#146CFF]',
         ].join(' '),
 
         // selected 只对内部 day_button 生效（不污染 <td> 背景）

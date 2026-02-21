@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import {
   format,
   subDays,
@@ -271,6 +271,18 @@ export function OrderVolumePanel() {
   const [displayMonth, setDisplayMonth] = useState(() =>
     startOfMonth(defaultRange.from ?? new Date())
   )
+  const handleRangeSelect = useCallback(
+    (range: DateRange | undefined, selectedDay: Date) => {
+      if (dateRange?.from && dateRange?.to) {
+        // 已有完整区间 → 以点击日期为新起点重新选择
+        setDateRange({ from: selectedDay, to: undefined })
+      } else {
+        setDateRange(range)
+      }
+    },
+    [dateRange]
+  )
+
   const chartData = CHART_DATA_BY_METRIC[selectedMetric] ?? CHART_DATA_BY_METRIC[METRICS[0].name]
   const yMax = Math.max(5, ...chartData.map((d) => d.value))
 
@@ -424,7 +436,7 @@ export function OrderVolumePanel() {
                       month={displayMonth}
                       onMonthChange={(m) => m && setDisplayMonth(m)}
                       selected={dateRange}
-                      onSelect={setDateRange}
+                      onSelect={handleRangeSelect}
                       numberOfMonths={2}
                       fixedWeeks
                       locale={dayPickerZhCN}
