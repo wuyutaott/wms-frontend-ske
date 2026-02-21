@@ -1,4 +1,5 @@
 import { cn } from '@/shared/utils/cn'
+import { OrderVolumePanel } from './OrderVolumePanel'
 
 const PANELS = [
   { title: '入库', items: [{ subtitle: '待入库', value: 43 }] },
@@ -69,6 +70,8 @@ export default function DashboardPage() {
           <StatCard key={panel.title} title={panel.title} items={panel.items} />
         ))}
       </div>
+
+      <OrderVolumePanel />
     </div>
   )
 }
