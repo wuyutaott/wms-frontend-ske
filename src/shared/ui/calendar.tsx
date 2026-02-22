@@ -47,10 +47,10 @@ function Calendar({
         // 单元格：relative 供 ::before 伪元素定位，不在此设置背景/圆角
         day: 'relative flex flex-1 items-center justify-center overflow-visible p-0 text-center text-sm w-full min-w-0',
 
-        // 按钮：relative + z-[1] 确保浮在 ::before 伪元素之上
+        // 按钮：relative + z-[1] 确保浮在 ::before 伪元素之上；hover 时当前日期亮蓝色
         day_button: cn(
           buttonVariants({ variant: 'ghost' }),
-          'relative z-[1] flex h-9 w-9 min-h-9 min-w-9 max-h-9 max-w-9 shrink-0 items-center justify-center rounded-full p-0 font-normal aria-selected:opacity-100 aspect-square'
+          'relative z-[1] flex h-[28px] w-[28px] min-h-[28px] min-w-[28px] max-h-[28px] max-w-[28px] shrink-0 items-center justify-center rounded-full p-0 font-normal aria-selected:opacity-100 aspect-square hover:!bg-[#146CFF] hover:!text-white active:!bg-[#146CFF] active:!text-white'
         ),
 
         // range 背景条通过 ::before 伪元素实现，与圆形端点无缝衔接：
@@ -61,25 +61,25 @@ function Calendar({
           'day-range_start',
           // 铺满整格，仅左侧边缘加半圆 → 药丸背景从 day1 左边缘开始
           "before:absolute before:inset-y-0 before:left-0 before:right-0 before:content-[''] before:bg-[#146CFF]/10 before:rounded-l-full",
-          '[&_.day_button]:!bg-[#146CFF] [&_.day_button]:!text-white [&_.day_button:hover]:!bg-[#146CFF] [&_.day_button]:!shadow-[0_0_0_2px_white,0_0_0_4px_#146CFF]',
+          '[&_.day_button]:!bg-[#146CFF] [&_.day_button]:!text-white [&_.day_button]:!shadow-[0_0_0_2px_white,0_0_0_4px_#146CFF] [&_.day_button:hover]:!bg-[#3d8bff] [&_.day_button:hover]:!shadow-[0_0_0_3px_white,0_0_0_5px_#146CFF]',
         ].join(' '),
         range_middle: [
           'day-range_middle',
           // 整格铺满，无圆角
           "before:absolute before:inset-y-0 before:left-0 before:right-0 before:content-[''] before:bg-[#146CFF]/10",
-          '[&_.day_button]:!bg-transparent [&_.day_button]:!text-foreground [&_.day_button:hover]:!bg-[#146CFF]/20',
+          '[&_.day_button]:!bg-transparent [&_.day_button]:!text-foreground [&_.day_button:hover]:!bg-[#146CFF] [&_.day_button:hover]:!text-white',
         ].join(' '),
         range_end: [
           'day-range_end',
           // 铺满整格，仅右侧边缘加半圆 → 药丸背景到 day10 右边缘结束
           "before:absolute before:inset-y-0 before:left-0 before:right-0 before:content-[''] before:bg-[#146CFF]/10 before:rounded-r-full",
-          '[&_.day_button]:!bg-[#146CFF] [&_.day_button]:!text-white [&_.day_button:hover]:!bg-[#146CFF] [&_.day_button]:!shadow-[0_0_0_2px_white,0_0_0_4px_#146CFF]',
+          '[&_.day_button]:!bg-[#146CFF] [&_.day_button]:!text-white [&_.day_button]:!shadow-[0_0_0_2px_white,0_0_0_4px_#146CFF] [&_.day_button:hover]:!bg-[#3d8bff] [&_.day_button:hover]:!shadow-[0_0_0_3px_white,0_0_0_5px_#146CFF]',
         ].join(' '),
 
-        // selected 只对内部 day_button 生效（不污染 <td> 背景）
+        // selected 只对内部 day_button 生效（不污染 <td> 背景）；单日选中或点下时也显示蓝色圆圈+白边
         // range_middle 会通过 !important 覆盖此处的 button 样式
         selected:
-          '[&_.day_button]:bg-[#146CFF] [&_.day_button]:text-white [&_.day_button:hover]:bg-[#146CFF]',
+          '[&_.day_button]:!bg-[#146CFF] [&_.day_button]:!text-white [&_.day_button]:!shadow-[0_0_0_2px_white,0_0_0_4px_#146CFF] [&_.day_button:hover]:!bg-[#146CFF]',
 
         today: 'bg-accent text-accent-foreground',
         outside: 'day-outside text-muted-foreground opacity-50',
